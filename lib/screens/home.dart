@@ -1,93 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:lingopanda/product_provider.dart';
+import 'package:lingopanda/screens/product_model.dart';
 import 'package:provider/provider.dart';
 
-// Product model class
-class ProductModel {
-  final String name;
-  final String description;
-  final double originalPrice;
-  final double discountedPrice;
-  final double discountPercentage;
+class ProductScreen extends StatefulWidget {
+  const ProductScreen({super.key});
 
-  ProductModel({
-    required this.name,
-    required this.description,
-    required this.originalPrice,
-    required this.discountedPrice,
-    required this.discountPercentage,
-  });
+  @override
+  State<ProductScreen> createState() => _ProductScreenState();
 }
 
-// Product provider class to manage state
-class ProductProvider with ChangeNotifier {
-  List<ProductModel> _products = [
-    ProductModel(
-      name: 'iPhone 9',
-      description: 'An apple mobile which is nothing like apple...',
-      originalPrice: 644,
-      discountedPrice: 499,
-      discountPercentage: 12.98,
-    ),
-    ProductModel(
-      name: 'iPhone 9',
-      description: 'An apple mobile which is nothing like apple...',
-      originalPrice: 644,
-      discountedPrice: 499,
-      discountPercentage: 12.98,
-    ),
-    ProductModel(
-      name: 'iPhone 9',
-      description: 'An apple mobile which is nothing like apple...',
-      originalPrice: 644,
-      discountedPrice: 499,
-      discountPercentage: 12.98,
-    ),
-    ProductModel(
-      name: 'iPhone 9',
-      description: 'An apple mobile which is nothing like apple...',
-      originalPrice: 644,
-      discountedPrice: 499,
-      discountPercentage: 12.98,
-    ),
-  ];
+class _ProductScreenState extends State<ProductScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the products when the screen initializes
+    Future.microtask(() => Provider.of<ProductProvider>(context, listen: false).fetchProducts());
+  }
 
-  List<ProductModel> get products => _products;
-}
-
-// Main screen widget
-class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final products = Provider.of<ProductProvider>(context).products;
+    final productProvider = Provider.of<ProductProvider>(context);
+    final products = productProvider.products;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('e-Shop'),
+        title: const Text('e-Shop'),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // For small screens, use ListView, for large screens use GridView
-          if (constraints.maxWidth < 600) {
-            return ListView.builder(
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                return ProductCard(product: products[index]);
+      body: productProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                if (products.isEmpty) {
+                  return const Center(child: Text('No products available'));
+                }
+
+                // For small screens, use ListView, for large screens use GridView
+                if (constraints.maxWidth < 600) {
+                  return ListView.builder(
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      return ProductCard(product: products[index]);
+                    },
+                  );
+                } else {
+                  return GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 3 / 4,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      return ProductCard(product: products[index]);
+                    },
+                  );
+                }
               },
-            );
-          } else {
-            return GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Two columns for large screens
-                childAspectRatio: 3 / 4, // Adjust card height
-              ),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                return ProductCard(product: products[index]);
-              },
-            );
-          }
-        },
-      ),
+            ),
     );
   }
 }
@@ -96,21 +65,20 @@ class ProductScreen extends StatelessWidget {
 class ProductCard extends StatelessWidget {
   final ProductModel product;
 
-  ProductCard({required this.product});
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.all(10),
+      margin: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Placeholder image for product
-          Image.asset(
-            'assets/imgs/iphone.jpeg', // Replace with actual image if available
+          Image.network(
+            product.imageUrl,
             height: 150,
             width: double.infinity,
             fit: BoxFit.cover,
@@ -119,7 +87,7 @@ class ProductCard extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               product.name,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
           Padding(
@@ -128,10 +96,10 @@ class ProductCard extends StatelessWidget {
               product.description,
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
-              style: TextStyle(color: Colors.grey),
+              style: const TextStyle(color: Colors.grey),
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -139,7 +107,7 @@ class ProductCard extends StatelessWidget {
               children: [
                 Text(
                   '\$${product.discountedPrice.toStringAsFixed(2)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.green,
                     fontSize: 16,
@@ -147,7 +115,7 @@ class ProductCard extends StatelessWidget {
                 ),
                 Text(
                   '${product.discountPercentage.toStringAsFixed(2)}% off',
-                  style: TextStyle(color: Colors.red, fontSize: 14),
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
                 ),
               ],
             ),
@@ -156,7 +124,7 @@ class ProductCard extends StatelessWidget {
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Text(
               '\$${product.originalPrice.toStringAsFixed(2)}',
-              style: TextStyle(
+              style: const TextStyle(
                 decoration: TextDecoration.lineThrough,
                 color: Colors.grey,
               ),
