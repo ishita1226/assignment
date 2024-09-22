@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "381182842582",
+    "project_id": "lingopanda-73bee",
+    "storage_bucket": "lingopanda-73bee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381182842582:android:ef0898918e7d5e1c2cdb77",
+        "android_client_info": {
+          "package_name": "com.ishita.lingopanda"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0NlcXiNl-7jrobHhpCpRRw5sXuUNO62E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
